@@ -15,8 +15,21 @@ data(mtcars)
 
 Just by taking a quick look at the data, we can see that the means of fuel efficiencies in miles per gallon for cars without automatic transmission (`r round(mean(mtcars$mpg[mtcars$am == 1]), 2)`) differs from that of cars with automatic transmission(`r round(mean(mtcars$mpg[mtcars$am == 0]), 2)`). This, however, does not control for all the other factors that might be confounding that mean nor does it account for the variability of the data.
 
-```{r singleLinear, include = FALSE}
+```{r linearFits}
 singleFit <- lm(mpg ~ factor(am), mtcars)
+allFit <- lm(mpg ~ ., mtcars)
+trioFit <- lm(mpg ~ factor(am) + cyl + wt + disp, mtcars)
+cwFit <- lm(mpg ~ factor(am) + cyl + wt, mtcars)
+co_cyl_disp <- cor(mtcars$cyl, mtcars$disp)
+co_cyl_wt <- cor(mtcars$cyl, mtcars$wt)
+co_disp_wt <- cor(mtcars$disp, mtcars$wt)
 ```
 
-If we regress mpg against transmission type by itself, we get a significant result to the .001 level. 
+If we regress mpg against transmission type by itself, we get a significant result to the .001 level that says cars with manual transmissions get better fuel efficiency than those with automatic transmissions. When we add in the other variables, though, the p value becomes .234 (not significant). By doing an anova() test, we can see that the most significant variables for mpg are number of cylinders, engine displacement, and weight. As one might expect, the correlation between weight of the car, displacement of the engine, and the number of cylinders is quite high. 
+
+We can see the correlations here:
+Cylinder/Displacement: `r round(co_cyl_disp, 3)`
+Cylinder/Weight: `r round(co_cyl_wt, 3)`
+Displacement/Weight: `r round(co_disp_wt, 3)`
+
+
