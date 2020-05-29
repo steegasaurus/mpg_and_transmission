@@ -69,4 +69,4 @@ When confounding variables are taken into account, there does not appear to be a
 
 ### Linear Regressions
 
-```{r ref.label = 'linearFits', eval = FALSE}```
+```{r ref.label = 'linearFits', eval = FALSE, echo = TRUE}```
