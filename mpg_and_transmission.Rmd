@@ -11,6 +11,10 @@ require(datasets)
 data(mtcars)
 ```
 
+## Executive Summary
+
+The mtcars data does not appear to show a significant relationship between transmission and fuel efficiency (mpg) when accounting for a couple of confounding variables. We are not able to quantify any difference in mpg coming from the transmission type as the relationship is not deemed significant in a linear regression.
+
 ## Exploring the Data
 
 Just by taking a quick look at the data, we can see that the means of fuel efficiencies in miles per gallon for cars without automatic transmission (`r round(mean(mtcars$mpg[mtcars$am == 1]), 2)`) differs from that of cars with automatic transmission(`r round(mean(mtcars$mpg[mtcars$am == 0]), 2)`). This, however, does not control for all the other factors that might be confounding that mean nor does it account for the variability of the data.
@@ -20,6 +24,7 @@ singleFit <- lm(mpg ~ factor(am), mtcars)
 allFit <- lm(mpg ~ ., mtcars)
 trioFit <- lm(mpg ~ factor(am) + cyl + wt + disp, mtcars)
 cwFit <- lm(mpg ~ factor(am) + cyl + wt, mtcars)
+cylFit <- lm(mpg ~ factor(am) + cyl, mtcars)
 co_cyl_disp <- cor(mtcars$cyl, mtcars$disp)
 co_cyl_wt <- cor(mtcars$cyl, mtcars$wt)
 co_disp_wt <- cor(mtcars$disp, mtcars$wt)
@@ -32,4 +37,36 @@ Cylinder/Displacement: `r round(co_cyl_disp, 3)`
 Cylinder/Weight: `r round(co_cyl_wt, 3)`
 Displacement/Weight: `r round(co_disp_wt, 3)`
 
+Summaries for the fits are in the appendix, along with the code.
 
+## Testing for Bias
+
+Now that we have a couple significant variables, we can try testing for bias. Let's just take a look at residuals plotted across mpg.
+
+```{r residPlot}
+par(mfrow = c(2, 2))
+mpg <- mtcars$mpg; residAll <- resid(allFit); residTrio <- resid(trioFit); residCW <- resid(cwFit)
+residCyl <- resid(cylFit)
+plot(mpg, residAll, main = 'All Variables', ylab = 'Residuals')
+plot(mpg, residCyl, main = 'Transmission + Cylinder', ylab = '')
+plot(mpg, residCW, main = 'Trans, Cyl, + Weight', ylab = 'Residuals')
+plot(mpg, residTrio, main = 'Add Displacement', ylab = '')
+fitTest <- anova(cylFit, trioFit, allFit)
+gm <- glm(am ~ mpg + cyl + wt, family = 'binomial', data = mtcars)
+```
+
+From the plot, it appears that limiting the variables to transmission type and number of cylinders may add some bias, but adding weight to the mix corrects for the bias. We can double check that with an anova test and inded we find that the addition of addition of weight corrects bias, but including additional variables is unnecessary. (note: the anova test can be found in the appendix). 
+
+One other way we can look at it is the probability the transmission is manual as mpg rises using a binomial model. With a GLM, it appears the probability of a car having an automatic transmission declines by about 7% with an increase of one mpg, even controlling for cylinders and weight. The p-value, however, is .83. This result is clearly not significant. (summary of glm is also in appendix)
+
+## Analyzing the Results
+
+When confounding variables are taken into account, there does not appear to be a relationship between fuel efficiency and transmission type from this data. Although there is a correlation between mpg and transmission type (`r round(cor(mtcars$mpg, mtcars$am))`), it is nowhere near significant when accounting for weight and number of cylinders. The correlation we are seeing could be coming from compact cars with high mpg.
+
+
+\newpage
+# Appendix
+
+### Linear Regressions
+
+```{r ref.label = 'linearFits', eval = FALSE}```
