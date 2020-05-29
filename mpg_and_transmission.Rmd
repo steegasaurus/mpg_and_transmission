@@ -1,0 +1,22 @@
+---
+title: "MPG and Transmission"
+author: "Steeg Pierce"
+date: "5/29/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+require(datasets)
+data(mtcars)
+```
+
+## Exploring the Data
+
+Just by taking a quick look at the data, we can see that the means of fuel efficiencies in miles per gallon for cars without automatic transmission (`r round(mean(mtcars$mpg[mtcars$am == 1]), 2)`) differs from that of cars with automatic transmission(`r round(mean(mtcars$mpg[mtcars$am == 0]), 2)`). This, however, does not control for all the other factors that might be confounding that mean nor does it account for the variability of the data.
+
+```{r singleLinear, include = FALSE}
+singleFit <- lm(mpg ~ factor(am), mtcars)
+```
+
+If we regress mpg against transmission type by itself, we get a significant result to the .001 level. 
